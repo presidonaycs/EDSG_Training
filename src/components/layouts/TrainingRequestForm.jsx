@@ -371,7 +371,7 @@ const TrainingRequestForm = ({ details, closeForm }) => {
         });
         return;
       }
-      if (size / 1024 >  1000 * 500) {
+      if (size / 1024 >  500000 ) {
         notification({
           title: 'File Too Large',
           message: 'The file size must not be more than 500MB',
