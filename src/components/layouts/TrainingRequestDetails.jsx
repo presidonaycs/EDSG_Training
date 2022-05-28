@@ -9,14 +9,16 @@ import CommentModal from "../layouts/CommentModal";
 import Successmodal from "../layouts/SuccessModal";
 import ErrorModal from "../layouts/ErrorModal";
 import { PDFExport } from "@progress/kendo-react-pdf";
+import Cookies from 'js-cookie';
 // Api
 import { URLAPI } from "../../utility/ApiMethods";
 import { Put, Get } from "../../utility/fetch";
-
+import EdsgLogo from "../../assets/images/edsg-logo-250.png"
 // Image
-import imageSrc from "../../assets/images/user-avater.png";
+import festac from "../../assets/images/Festac-logo.jpg";
 import { formatFileUrl, formatReviewStatus } from "../../utility/general";
 import CompletionFormModal from "./CompletionFormModal";
+import PictureModal from "./PictureModal";
 
 const borderBottom = {
   borderBottom: "1px solid rgba(108,108,108,.4)",
@@ -37,6 +39,18 @@ const TrainingRequestDetails = (props) => {
   const [errorMsg, setErrorMsg] = React.useState("");
   const [btnText, setBtnText] = React.useState("");
   const [reviewDetails, setReviewDetails] = React.useState({});
+  const [showPictureModal, setShowPictureModal] = React.useState(false)
+
+
+ 
+ const openPicture =() =>{
+   console.log("open")
+   setShowPictureModal(true);
+ }
+
+ const closePictureModal =()=>{
+  setShowPictureModal(false)
+ }
 
   const approvalRequest = () => {
 
@@ -116,20 +130,37 @@ const TrainingRequestDetails = (props) => {
   return (
     <div className="m-t-10" style={{ transition: "all 0.6s ease-in" }}>
       
-        <PDFExport paperSize="auto" margin="2mm" fileName={`Leave Plan `} ref={pdfExportComponent}>
+        <PDFExport paperSize="A2" margin="2mm" fileName={props.cardDetails.title} ref={pdfExportComponent}>
+
+        <div className='flex-between flex-align w-100 p-20 m-t-20 m-b-10' style={{
+                boxShadow: "0px 2px 6px #0000000A",
+                backgroundColor: "white",
+              }}>
+          <div className="sidebar-header">
+            <img src={EdsgLogo} alt="logo" className="brand" width="150" />
+          </div>
+          <div style={{ textAlign: "center" }}>
+            <b>{Cookies.get("mdaName")?.toUpperCase() || "Personal Care And Beauty Agency"}</b>
+             {/* <p className="no-margin">7th Floor, Block C, Secretariat Building, Sapele Road,</p>  */}
+            <p className="no-margin">{Cookies.get("mdaAddress") || "7th Floor, Block C, Secretariat Building, Sapele Road"}</p>
+          </div>
+          <div>
+            <img src={festac} width='40px' />
+          </div>
+
+        </div>
 
       <div className="flex" >
         <div className="flex flex-direction-column col-4 no-padding">
           <div className="no-padding">
-
             <div
               style={{
                 boxShadow: "0px 2px 6px #0000000A",
                 backgroundColor: "white",
               }}
             >
-              <div style={{ borderBottom: "1px solid rgba(108,108,108,.4)" }}>
-                <h4 className="" style={{ padding: ".8rem" }}>
+              <div style={{ borderBottom: "1px solid rgba(108,108,108,.4)", borderTop: "1px solid rgba(108,108,108,.4)" }}>
+                <h4 className="" style={{ padding: ".8rem",  backgroundColor: "#f5f7f9", borderBottom: "1px solid rgba(108,108,108,.4)" }} >
                   Training Profile
                 </h4>
               </div>
@@ -251,7 +282,7 @@ const TrainingRequestDetails = (props) => {
                       
                 </div>
                 <div className="flex  wrap space-between pd-10 w-100">
-                  <div>Subcription</div>
+                  <div>Subscription</div>
                   <div>
                     {props.cardDetails &&
                       props.cardDetails.subscriptionExpense &&
@@ -385,6 +416,16 @@ const TrainingRequestDetails = (props) => {
                     <div className="w-100 m-b-20">
                       <h4 className="underline m-b-10">Supporting Document</h4>
                       {props.cardDetails && props.cardDetails.documentPath && (
+
+                       (
+                        props.cardDetails.documentPath.includes("png") || 
+                        props.cardDetails.documentPath.includes("jpg") || 
+                        props.cardDetails.documentPath.includes("gif") 
+                       ) ?
+                        <i className="pointer picture-link" onClick={()=>openPicture()}>
+                          Training Request Supporting Document
+                        </i>
+                       :
                         <a
                           className="gray underline flex"
                           href={String(props.cardDetails.documentPath)}
@@ -480,11 +521,7 @@ const TrainingRequestDetails = (props) => {
                       >
                         Reviewer {idx + 1}:
                       </div>
-                      <div className={`m-l-5 status status-r-${detail.status}`}>
-                        <b>{formatReviewStatus(detail.status)}</b>
-                      </div>
-                    </div>
-                    <div className="flex">
+                      <div className={`m-l-5 `}>
                       <div
                         className="flex flex-direction-column m-r-5"
                         style={{ textAlign: "right" }}
@@ -492,23 +529,28 @@ const TrainingRequestDetails = (props) => {
                         <h4 className="bold-text">{detail.approver}</h4>
                         <p style={{ color: "#909090" }}>{detail.role}</p>
                       </div>
-                      <div style={{ position: "relative", bottom: "3px" }}>
-                        <img
-                          src={formatFileUrl(detail.profilePicture) || imageSrc}
-                          alt=""
-                          width="40px"
-                          style={{ borderRadius: "50%" }}
-                        />
+                      </div>
+                    </div>
+                    <div className="flex">
+                     
+                      <div style={{ position: "relative", top: "13px", right: '50px' }}>
+                        SIGNATURE
                       </div>
                     </div>
                   </div>
                 </div>
-                <div className="p-10-20">
+                <div  className="p-10-20 flex space-between">
+                  <div className="p-10-20">
                   <h4 className="m-b-5" style={{ color: "#1C811C" }}>
                     Action/Recommendation
                   </h4>
                   <p className="m-b-10">{detail.comment || ""}</p>
                 </div>
+                <img style={{width: '200px', height:'80px'}} src={`data:image/png;base64, ${detail.signature64}`} alt='signature'/>
+
+                </div>
+                
+               
               </div>
             ))}
           {props.cardDetails.status === 7 && (
@@ -552,8 +594,9 @@ const TrainingRequestDetails = (props) => {
                     </p>
                     <img
                       className="m-t-10 w-100 p-20"
+                      style={{}}
                       src={
-                        props.cardDetails.certificationPath || ""
+                        `data:image/jpeg;base64, ${props.cardDetails.certificationPath}` || ""
                       }
                       alt="upload certificate..."
                     />
@@ -608,6 +651,9 @@ const TrainingRequestDetails = (props) => {
           <ErrorModal action={errorMsg} closeModal={() => closeModal()} />
         </div>
       )}
+      {
+        showPictureModal && <PictureModal closeModal = {closePictureModal} picture={props.cardDetails.documentPath} />
+      }
       {showCompletionModal && (
         <CompletionFormModal
           requestId={props.cardDetails.id}
@@ -616,7 +662,7 @@ const TrainingRequestDetails = (props) => {
       )}
       </PDFExport>
       {
-        props.cardDetails.status !== 3 && props.cardDetails.status !== 4 && <div className="mb5 flex justify-content-center m-b-20 ">
+        props.cardDetails.status === 1 || props.cardDetails.status === 7 && <div className="mb5 flex justify-content-center m-b-20 ">
           <button  className='btn btn w-100' onClick={() => {
             if (pdfExportComponent.current) {
               pdfExportComponent.current.save();

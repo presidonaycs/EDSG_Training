@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { BsUpload } from 'react-icons/bs';
 import { RiDeleteBin5Line } from 'react-icons/ri';
 import { IoMdClose } from 'react-icons/io';
+import Cookies from 'js-cookie';
+import axios from "axios";
+// import Cookies from 'js-cookie'
 
 import { get, put, post } from '../../api-services/fetch';
 import { convertImgToBase64, formatFileUrl } from '../../utility/general';
@@ -26,17 +29,26 @@ const TrainingRequestForm = ({ details, closeForm }) => {
   const [organisingBody, setOrganisingBody] = useState('');
   const [location, setLocation] = useState('');
   const [totalCost, setTotalCost] = useState('');
-
-
+  const [approversOptions, setApproversOptions] = useState([]);
+  const [approvers, setApprovers] = useState([])
   const [firstApproverOptions, setFirstApproverOptions] = useState([])
   const [secondApproverOptions, setSecondApproverOptions] = useState([])
   const [firstApprover, Options] = useState('')
   const [secondApprover, setSecondApprover] = useState('')
-  const [firstApproverId, setFirstApproverId] = useState(0)
+  const [approverId, setApproverId] = useState({})
   const [secondApproverId, setSecondApproverId] = useState(0)
+  const [employees, setemployees] = useState([])
+  const [employeeList, setEmployeeList] = useState([])
+  const [employeeName, setemployeeName] = useState('')
+  const [mdaList, setMdaList] = useState([])
+  const [recipientMda, setrecipientMda] = useState()
   
   
   
+
+
+
+
   
 
   const [dtaExpense, setDtaExpense] = useState(null);
@@ -45,7 +57,7 @@ const TrainingRequestForm = ({ details, closeForm }) => {
   const [journalPublicationExpense, setJournalPublicationExpense] = useState(null);
   const [subscriptionExpense, setSubscriptionExpense] = useState(null);
   const [contingenciesExpense, setContingenciesExpense] = useState(null);
-  
+  const [userId, setUserId] = useState(Number(Cookies.get('userId')))
 
   const [personalExpense, setPersonalExpense] = useState(null);
 
@@ -59,8 +71,12 @@ const TrainingRequestForm = ({ details, closeForm }) => {
   const [categories, setCategories] = useState([]);
   const [methods, setMethods] = useState([]);
 
+const BASE_API_URL= `https://edogoverp.com/services/api`
+
+
   useEffect(() => {
     window.scrollTo(0, 0);
+    getMdas()
 
     if (details && details.id) {
       setFormType('edit');
@@ -84,8 +100,10 @@ const TrainingRequestForm = ({ details, closeForm }) => {
       setLocalTransportationExpense(details.localTransportationExpense || '');
       setDtaExpense(details.dtaExpense || '');
       setUploadedDocuments(details.documentPath || '');
-      setFirstApproverId(details.setFirstSupervisorId || 0);
-      setSecondApproverId(details.setSecondSupervisorId || 0);
+      setApproverId(details.setFirstSupervisorId || 0);
+
+      
+      
     } else {
       setFormType('create');
     }
@@ -95,17 +113,72 @@ const TrainingRequestForm = ({ details, closeForm }) => {
   }, [details]);
 
 
-  const handleFirstApprover = async (param) =>{
-    const res = await get({ endpoint: `/Request/searchemployee/${param}` })
-    console.log(res);
-    res?.data && setFirstApproverOptions(res?.data?.map((item)=>({label:item.name, value:item.id})))
+  const handleApproverId =(e)=>{
+    setApprovers(e)
+    console.log(e)
+  }
+  const getMdas = ()=>{
+    axios
+    .get(`${BASE_API_URL}/Employees/mdas`)
+    .then((response) => {
+        
+        console.log("--mdas--")
+        console.log(response?.data)
+        // this.setState({
+          const roleList = response?.data.map((item) => ({
+            name: `${item.name}`,
+            value: item.id,
+          }));
+          setMdaList(roleList)
+           
+        // });
+    })
   }
 
-  const handleSecondApprover = async (param) =>{
+  const getEmployeesFromMda = (id)=>{
+    axios
+    .get(`${BASE_API_URL}/Employees/employees_by_mda?mdaid=${id}`)
+    .then((response) => {
+        
+        console.log("--employeesByNads--")
+        console.log(response?.data)
+        // this.setState({
+          const roleList = response?.data.map((item) => ({
+            name: `${item.name}`,
+            value: item.id,
+          }));
+        setemployees(roleList.filter((item)=>{return !item.name.includes(Cookies.get('fullname'))}));
+
+          // setMdaList(roleList)
+           
+        // });
+    })
+  }
+
+
+  useEffect(()=>{
+    console.log(approverId)
+      setApproverId(approvers.map((item)=>(
+        {
+          
+            id: 0,
+            roleId: 0,
+            userId : item.value,
+            sequence: 0
+          
+        }
+      )
+    ))
+  }, [approvers])
+
+
+  const handleApprovers = async (param) =>{
     const res = await get({ endpoint: `/Request/searchemployee/${param}` })
     console.log(res);
-    res?.data && setSecondApproverOptions(res?.data?.map((item)=>({label:item.name, value:item.id})))
+    res?.data && setApproversOptions(res?.data?.map((item)=>({label:item.name, value:item.id})).filter((item)=>{ return !item.label.includes(Cookies.get('fullname'))}))
   }
+
+  
 
   // const setSApprover = async (param) =>{
   //   const res = await get({ endpoint: `/Request/searchemployee/${param}` })
@@ -178,6 +251,7 @@ const TrainingRequestForm = ({ details, closeForm }) => {
     if (!startDate) return 'Please, enter a start date for the request';
     if (getDaysFromDate(startDate) < 0) return 'Start date must not be behind today';
     if (!endDate) return 'Please, enter a end date for the request';
+    if(approverId.length < 1) return 'Please select at least one approver fo the request.'
     // if (getDaysFromDate(endDate) < 0) return 'end date must not be beyond today';
     if (!organisingBody) return 'Please, enter an organising body for the request';
     if (!location) return 'Please, enter a location for the training';
@@ -205,8 +279,8 @@ const TrainingRequestForm = ({ details, closeForm }) => {
 
   const submitForm = async (type) => {
 
-    console.log(firstApproverId);
-    console.log(secondApproverId);
+    console.log(approverId);
+ 
 
     const error = validateForm();
    
@@ -275,13 +349,12 @@ const TrainingRequestForm = ({ details, closeForm }) => {
       organisingBody,
       details: description,
       location,
+      approvers:approverId,
       impactOnindividual,
       impactOnOrganisation,
       documentPath: documentPath || uploadedDocuments || '',
       personalExpense: +personalExpense || 0,
-      totalCost: Number(totalCost),
-      firstSupervisorId:parseInt(firstApproverId.value),
-      secondSupervisorId:parseInt(secondApproverId.value)
+      totalCost: Number(totalCost)
     };
 
     if (details && details.id) {
@@ -321,7 +394,7 @@ const TrainingRequestForm = ({ details, closeForm }) => {
           type: 'success'
         });
         resetForm();
-        window.location.reload();
+         window.location.reload();
       } else {
         notification({
           title: `Request ${formType === 'create' ? 'Creation' : 'Update'} Error`,
@@ -420,17 +493,13 @@ const TrainingRequestForm = ({ details, closeForm }) => {
     setUploadedDocuments('');
     setFileArray([]);
     setB64FileArray([]);
-    
     setDtaExpense(null);
     setTransportationExpense(null);
     setLocalTransportationExpense(null);
     setJournalPublicationExpense(null);
     setSubscriptionExpense(null);
     setContingenciesExpense(null);
-
-    
-  
- 
+    setApprovers([])
   };
 
   const clearForm = () => {
@@ -467,23 +536,58 @@ const TrainingRequestForm = ({ details, closeForm }) => {
               />
             </div>
           </div>
-          <Select
-            className="w-100 m-b-10"
-            options={firstApproverOptions}
-            value={firstApproverId}
-            onChange={(e)=>{setFirstApproverId(e)}}
-            onInputChange={(e)=>{handleFirstApprover(e)}}
-            placeholder="First Approver"
-          />
 
           <Select
+            placeholder="Select Approvers MDA"
+            // isMulti
+                    className="basic-multi-select"
+                    onChange={(value) => {
+                      console.log(value)
+                    // this.setState({ employeeName: e.target.value });
+                    setrecipientMda(value);
+                      getEmployeesFromMda(value.value)
+                      // this.setState({recipientMda:value});
+                    }}
+                    value={recipientMda}
+                    options={mdaList.map((m) => ({
+                      label: m.name,
+                      value: m.value,
+                    }))}
+                  />
+
+<Select
+            placeholder="Select Approver"
+            // isMulti
+                    className="basic-multi-select m-t-10 m-b-10"
+                    onChange={(value) => {
+                      console.log(value.value)
+                    setemployeeName(value);
+                    handleApproverId(value)
+                    // handleApproverId(value)
+                    // setEmployeeList(value.value);
+                    // this.setState({ employeeList: value });
+
+                      // this.getEmployeesFromMda(value.value)
+                      // this.setState({recipientMda:value});
+                    }}
+                    // onChange={(e)=>{handleApproverId(e)}}
+                    onInputChange={(e)=>{handleApprovers(e)}}
+            isMulti
+            value={employeeName}
+                    options={employees?.map((m) => ({
+                      label: m.name,
+                      value: m.value,
+                    }))}
+                  />
+          {/* <Select
             className="w-100 m-b-10"
-            options={secondApproverOptions}
-            value={secondApproverId}
-            onChange={(e) => setSecondApproverId(e)}
-            onInputChange={(e)=>{handleSecondApprover(e)}}
-            placeholder="Second Approver"
-          />
+            options={approversOptions}
+            value={approvers}
+            isMulti
+            onChange={(e)=>{handleApproverId(e)}}
+            onInputChange={(e)=>{handleApprovers(e)}}
+            placeholder="Select Approvers"
+          /> */}
 
           <TextInput
             className="w-100 m-b-10"
@@ -508,7 +612,7 @@ const TrainingRequestForm = ({ details, closeForm }) => {
             className="w-100 m-b-10"
             value={subscriptionExpense}
             onChange={(e) => setSubscriptionExpense(e.target.value)}
-            label="Subcription"
+            label="Subscription"
           />
           
             </div>
@@ -569,7 +673,7 @@ const TrainingRequestForm = ({ details, closeForm }) => {
                 rows={4}
                 value={impactOnindividual}
                 onChange={(e) => setImpactOnindividual(e.target.value)}
-                label="Expected inpact on the Individual*"
+                label="Expected impact on the Individual*"
               />
             </div>
             <div className="col-6 no-margin">
@@ -578,7 +682,7 @@ const TrainingRequestForm = ({ details, closeForm }) => {
                 rows={4}
                 value={impactOnOrganisation}
                 onChange={(e) => setImpactOnOrganisation(e.target.value)}
-                label="Expected inpact on the Organization*"
+                label="Expected impact on the Organization*"
               />
             </div>
           </div>

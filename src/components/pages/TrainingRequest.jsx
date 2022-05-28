@@ -14,6 +14,8 @@ import TrainingRequestDetails from "../layouts/TrainingRequestDetails";
 import { del, get } from '../../api-services/fetch';
 import notification from '../../utility/notification';
 
+
+
 const TrainingRequest = ({ history }) => {
   const [selectedRequest, setSelectedRequest] = useState(null);
 
@@ -50,6 +52,9 @@ const TrainingRequest = ({ history }) => {
 
     getList();
   }, []);
+
+ 
+
 
   const editRequest = (info) => {
     console.log('About to show the form...');

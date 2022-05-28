@@ -36,6 +36,9 @@ class Home extends Component {
         });
         Cookies.set("role", res.data.role, { expires: 0.0416665 });
         Cookies.set("homeLink", res.data.homeLink, { expires: 0.0416665 });
+        Cookies.set("userId", res.data.userID, { expires: 0.0416665 });
+        Cookies.set("mdaAddress", res.data.mdaAddress, { expires: 0.0416665 });
+        Cookies.set("mdaName", res.data.mdaName, { expires: 0.0416665 });
 
         setTimeout(() => {
           history.push("/training-manager");
