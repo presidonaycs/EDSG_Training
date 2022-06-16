@@ -5,6 +5,8 @@ export const URLAPI = {
   },
   pendingrequest: {
     Get: "/Approval/pendingapprovalrequest",
+    GetApproved: "/Approval/approvedapprovalrequest",
+    GetDeclined: "/Approval/declinedapprovalrequest",
     GetDetails: "/Approval/approvalprogress/",
   },
   approveTraining: {

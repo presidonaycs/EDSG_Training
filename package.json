@@ -5,6 +5,8 @@
   "dependencies": {
     "@material-ui/core": "^4.11.3",
     "@material-ui/icons": "^4.11.2",
+    "@progress/kendo-drawing": "^1.16.3",
+    "@progress/kendo-licensing": "^1.2.2",
     "@progress/kendo-react-pdf": "^5.1.0",
     "@testing-library/jest-dom": "^5.11.10",
     "@testing-library/react": "^11.2.5",
@@ -29,6 +31,7 @@
     "react-scripts": "^4.0.3",
     "react-select": "^5.2.2",
     "react-select-search": "^3.0.7",
+    "react-tabs": "^5.1.0",
     "react-tooltip": "^4.2.19",
     "react-usestateref": "^1.0.5",
     "recharts": "^2.0.9",
