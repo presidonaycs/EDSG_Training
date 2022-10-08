@@ -16,6 +16,7 @@ class Home extends Component {
     let qs = querySearch(this.props.location.search);
     localStorage.setItem("helpLink", qs?.help);
     localStorage.setItem("api", qs?.base);
+    localStorage.setItem("fromdashboard", qs?.fromdashboard);
     setTimeout(() => {
       // location();
       Cookies.set("loginTime", moment().format("HH:mm a"));
@@ -40,8 +41,16 @@ class Home extends Component {
         Cookies.set("mdaAddress", res.data.mdaAddress, { expires: 0.0416665 });
         Cookies.set("mdaName", res.data.mdaName, { expires: 0.0416665 });
 
+        let qsSearch = querySearch(this.props.location.search);
+
         setTimeout(() => {
-          history.push("/training-manager");
+          if (qsSearch?.fromdashboard) {
+            history.push(
+              `/training-manager/approval?id=${qsSearch?.requestid}`
+            );
+          } else {
+            history.push(`/training-manager`);
+          }
           notification({
             title: "",
             message: "Welcome to Training Management",

@@ -105,6 +105,12 @@ const TrainingRequestDetails = (props) => {
     setShowCommentModal(false);
   };
 
+  const getDifferenceInDays = (date1, date2) => {
+    const diffInMs = moment(date2).diff(moment(date1), "days");
+    // const diffInMs = Math.abs(date2 - date1);
+    return diffInMs + 1;
+  };
+
   React.useEffect(() => {
     Get(
       `${URLAPI.pendingrequest.GetDetails}${props.cardDetails.id}`,
@@ -142,7 +148,8 @@ const TrainingRequestDetails = (props) => {
           </div>
           <div style={{ textAlign: "center" }}>
             <b>
-              {Cookies.get("mdaName")?.toUpperCase() ||
+              {props.cardDetails?.mda ||
+                Cookies.get("mdaName")?.toUpperCase() ||
                 "Personal Care And Beauty Agency"}
             </b>
             {/* <p className="no-margin">7th Floor, Block C, Secretariat Building, Sapele Road,</p>  */}
@@ -208,13 +215,19 @@ const TrainingRequestDetails = (props) => {
                   </p>
                   <p className="m-t-10">
                     <b>No of Days :&nbsp;</b>
-                    {props.cardDetails &&
-                      props.cardDetails.startDate &&
-                      props.cardDetails.endDate &&
-                      `${moment(props.cardDetails.endDate).diff(
-                        moment(props.cardDetails.startDate),
-                        "days"
-                      )}`}
+                    {
+                      props.cardDetails &&
+                        props.cardDetails.startDate &&
+                        props.cardDetails.endDate &&
+                        `${getDifferenceInDays(
+                          props.cardDetails.startDate,
+                          props.cardDetails.endDate
+                        )} `
+                      // `${moment(props.cardDetails.endDate).diff(
+                      //   moment(props.cardDetails.startDate),
+                      //   "days"
+                      // )}`}
+                    }
                   </p>
                 </div>
               </div>
@@ -388,6 +401,25 @@ const TrainingRequestDetails = (props) => {
                     </div>
                   </div>
                 </div>
+                {props.cardDetails && props.cardDetails.mda && (
+                  <div>
+                    <div className="w-100" style={{ paddingBottom: ".6rem" }}>
+                      <h4
+                        style={{
+                          padding: "0 .5rem .3rem",
+                        }}
+                      >
+                        MDA:
+                      </h4>
+                      <div className="m-l-50 border-bottom-gray-1">
+                        <p className="pd-b-5">
+                          {props.cardDetails && props.cardDetails.mda}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div>
                   <div className="w-100" style={{ paddingBottom: ".6rem" }}>
                     <h4
@@ -430,10 +462,10 @@ const TrainingRequestDetails = (props) => {
                         <h4 className="underline m-b-10">
                           Supporting Document
                         </h4>
-                        {props.cardDetails && props.cardDetails.documentPath && (
+                        {props.cardDetails && props.cardDetails?.documentPath && (
                           <a
                             className="gray underline flex"
-                            href={String(props.cardDetails.documentPath)}
+                            href={String(props.cardDetails?.documentPath)}
                             alt="Idea attached file"
                             target="_blank"
                             rel="noreferrer noopener"
@@ -443,7 +475,7 @@ const TrainingRequestDetails = (props) => {
                           </a>
                         )}
                         {props.cardDetails &&
-                          props.cardDetails.documents.length > 0 &&
+                          props.cardDetails?.documents?.length > 0 &&
                           props.cardDetails.documents.map((docs) => (
                             <a
                               className="gray underline flex"
@@ -462,7 +494,7 @@ const TrainingRequestDetails = (props) => {
                 </div>
               </div>
             </div>
-            {!props.owner && (
+            {!props.owner && props.cardDetails.status == 3 && (
               <div className="m-t-20 m-b-20">
                 <Accordion
                   title={"Action"}
@@ -532,7 +564,10 @@ const TrainingRequestDetails = (props) => {
                     style={{ borderBottom: "1px solid rgba(108,108,108,.4)" }}
                   >
                     <div className="flex space-between">
-                      <div className="flex flex-v-center">
+                      <div
+                        className="flex flex-v-center"
+                        style={{ width: "40%" }}
+                      >
                         <div
                           style={{
                             border: "1px solid #B2D4B2",
@@ -554,31 +589,56 @@ const TrainingRequestDetails = (props) => {
                           </div>
                         </div>
                       </div>
-                      <div className="flex">
+                      <div
+                        className="flex space-between"
+                        style={{ width: "30%" }}
+                      >
                         <div
                           style={{
                             position: "relative",
                             top: "13px",
-                            right: "50px",
                           }}
                         >
-                          SIGNATURE
+                          In-Tray
                         </div>
+                        <div
+                          style={{
+                            position: "relative",
+                            top: "13px",
+                          }}
+                        >
+                          Out-Tray
+                        </div>
+                      </div>
+                      <div className="flex">
+                        <div>SIGNATURE</div>
                       </div>
                     </div>
                   </div>
                   <div className="p-10-20 flex space-between">
-                    <div className="p-10-20">
+                    <div className="p-10-20" style={{ width: "40%" }}>
                       <h4 className="m-b-5" style={{ color: "#1C811C" }}>
                         Action/Recommendation
                       </h4>
                       <p className="m-b-10">{detail.comment || ""}</p>
                     </div>
-                    <img
-                      style={{ width: "200px", height: "80px" }}
-                      src={`data:image/png;base64, ${detail.signature64}`}
-                      alt="signature"
-                    />
+                    <div
+                      className="flex space-between"
+                      style={{ width: "30%" }}
+                    >
+                      <div>{detail?.dateTimeIn?.substring(0, 12)}</div>
+
+                      <div>{detail?.date?.substring(0, 12)}</div>
+                    </div>
+                    <div className="flex">
+                      <div>
+                        <img
+                          style={{ width: "200px", height: "80px" }}
+                          src={`data:image/png;base64, ${detail.signature64}`}
+                          alt="signature"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}

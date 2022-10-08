@@ -1,44 +1,44 @@
-import React, { useEffect, useState } from 'react';
-import moment from 'moment-timezone';
+import React, { useEffect, useState } from "react";
+import moment from "moment-timezone";
 import Cookies from "js-cookie";
 
-import { IoMdClose } from 'react-icons/io';
+import { IoMdClose } from "react-icons/io";
 
 // import SuccessModal from "./SuccessModal";
-import Loader from '../../assets/svg/loading.svg';
-import TextInput from '../inputs/TextInput';
-import { toggleScroll } from '../../utility/general';
-import notification from '../../utility/notification';
-import { put, post, get } from '../../api-services/fetch';
-import SelectInput from '../inputs/SelectInput';
+import Loader from "../../assets/svg/loading.svg";
+import TextInput from "../inputs/TextInput";
+import { toggleScroll } from "../../utility/general";
+import notification from "../../utility/notification";
+import { put, post, get } from "../../api-services/fetch";
+import SelectInput from "../inputs/SelectInput";
 
 const TrainingApproverModal = ({ closeModal, updateList, details }) => {
-  const [sequence, setSequence] = useState('');
-  const [role, setRole] = useState('');
+  const [sequence, setSequence] = useState("");
+  const [role, setRole] = useState("");
   const [roles, setRoles] = useState([]);
 
-  const [formType, setFormType] = useState('');
+  const [formType, setFormType] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     toggleScroll();
     if (details && details.id) {
-      setFormType('edit');
+      setFormType("edit");
       setRole(details.roleId);
       setSequence(details.sequence);
     } else {
-      setFormType('create');
+      setFormType("create");
     }
 
     getRoles();
-    return () => setTimeout(() => {
-      toggleScroll();
-    }, 0);
+    return () =>
+      setTimeout(() => {
+        toggleScroll();
+      }, 0);
   }, [details]);
 
   const getRoles = async () => {
-    const res = await get({ endpoint: '/ApproverSetup/roles' });
-    console.log(res);
+    const res = await get({ endpoint: "/ApproverSetup/roles" });
     if (res && res.status === 200) {
       const { data } = res;
       if (data.code === 1) {
@@ -46,49 +46,50 @@ const TrainingApproverModal = ({ closeModal, updateList, details }) => {
         setRoles(roleList);
       } else {
         notification({
-          title: 'Error getting List of Roles',
+          title: "Error getting List of Roles",
           message: data.message,
-          type: 'danger'
+          type: "danger",
         });
       }
     } else {
       notification({
-        title: 'Error getting List of Roles',
-        message: 'Something has gone wrong. Please, try again.',
-        type: 'danger'
+        title: "Error getting List of Roles",
+        message: "Something has gone wrong. Please, try again.",
+        type: "danger",
       });
     }
   };
 
   const validateForm = () => {
-    if (!role) return 'Please, select a role';
-    if (!sequence) return 'Please, enter a Sequence number';
+    if (!role) return "Please, select a role";
+    if (!sequence) return "Please, enter a Sequence number";
     return null;
   };
 
   const submitForm = async () => {
     const body = {
       sequence: Number(sequence),
-      roleId: Number(role)
+      roleId: Number(role),
     };
     const error = validateForm(body);
 
     if (error) {
       notification({
-        title: 'Invalid Entry',
+        title: "Invalid Entry",
         message: error,
-        type: 'danger'
+        type: "danger",
       });
       return;
     }
 
     if (details && details.id) {
       body.id = details.id;
-    } 
+    }
     setIsLoading(true);
-    const res = formType === 'create'
-      ? await post({ endpoint: 'approval-setup', body })
-      : await put({ endpoint: 'approval-setup', body });
+    const res =
+      formType === "create"
+        ? await post({ endpoint: "approval-setup", body })
+        : await put({ endpoint: "approval-setup", body });
     console.log(res);
     setIsLoading(false);
 
@@ -96,36 +97,47 @@ const TrainingApproverModal = ({ closeModal, updateList, details }) => {
       const { data } = res;
       if (data.code === 1) {
         notification({
-          title: `Successful Sequence ${formType === 'create' ? 'Creation' : 'Update'}`,
+          title: `Successful Sequence ${
+            formType === "create" ? "Creation" : "Update"
+          }`,
           message: data.message,
-          type: 'success'
+          type: "success",
         });
-        const selectedRole = roles.filter((item) => item.value === Number(role));
-        updateList({
-          id: formType === 'edit' ? body.id : data.data,
-          roleId: role,
-          role: selectedRole[0].name,
-          sequence,
-          lastUpdated: moment().format('DD-MMM-YYYY hh:mm:ss A'),
-          lastUpdatedBy: Cookies.get("fullname")
-        }, formType === 'edit');
-        if (formType === 'edit') {
+        const selectedRole = roles.filter(
+          (item) => item.value === Number(role)
+        );
+        updateList(
+          {
+            id: formType === "edit" ? body.id : data.data,
+            roleId: role,
+            role: selectedRole[0].name,
+            sequence,
+            lastUpdated: moment().format("DD-MMM-YYYY hh:mm:ss A"),
+            lastUpdatedBy: Cookies.get("fullname"),
+          },
+          formType === "edit"
+        );
+        if (formType === "edit") {
           closeModal();
           return;
         }
-        setSequence('');
+        setSequence("");
       } else {
         notification({
-          title: `Sequence ${formType === 'create' ? 'Creation' : 'Update'} Error`,
+          title: `Sequence ${
+            formType === "create" ? "Creation" : "Update"
+          } Error`,
           message: data.message,
-          type: 'danger'
+          type: "danger",
         });
       }
     } else {
       notification({
-        title: 'Network Error',
-        message: `Something went wrong while ${formType === 'create' ? 'creating' : 'updating'} an Sequence. Please, try again later.`,
-        type: 'danger'
+        title: "Network Error",
+        message: `Something went wrong while ${
+          formType === "create" ? "creating" : "updating"
+        } an Sequence. Please, try again later.`,
+        type: "danger",
       });
     }
   };
@@ -154,9 +166,13 @@ const TrainingApproverModal = ({ closeModal, updateList, details }) => {
             onClick={submitForm}
             disabled={isLoading}
           >
-            {!isLoading && `${formType === 'create' ? 'Add' : 'Update'} Sequence`}
-            {isLoading && `${formType === 'create' ? 'Adding' : 'Updating'} Sequence...`}
-            {isLoading && <img src={Loader} className="btn-loading" alt="Loading..." />}
+            {!isLoading &&
+              `${formType === "create" ? "Add" : "Update"} Sequence`}
+            {isLoading &&
+              `${formType === "create" ? "Adding" : "Updating"} Sequence...`}
+            {isLoading && (
+              <img src={Loader} className="btn-loading" alt="Loading..." />
+            )}
           </button>
         </div>
       </div>

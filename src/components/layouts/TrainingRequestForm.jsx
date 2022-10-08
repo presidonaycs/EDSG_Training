@@ -89,10 +89,9 @@ const TrainingRequestForm = ({ details, closeForm }) => {
       setLocation(details.location || "");
       setTotalCost(details.totalCost || "");
       setPersonalExpense(details.personalExpense || "");
-      setTransportationExpense(details.personalExpense || "");
       setContingenciesExpense(details.contingenciesExpense || "");
       setSubscriptionExpense(details.subscriptionExpense || "");
-      setTransportationExpense(details.personalExpense || "");
+      setTransportationExpense(details.transportationExpense || "");
       setJournalPublicationExpense(details.journalPublicationExpense || "");
       setLocalTransportationExpense(details.localTransportationExpense || "");
       setDtaExpense(details.dtaExpense || "");

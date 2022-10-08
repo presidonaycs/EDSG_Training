@@ -10,9 +10,10 @@ import { FiAward } from "react-icons/fi";
 import { GrStatusGood } from "react-icons/gr";
 
 // Api
-import { get } from "../../api-services/fetch";
+import { get, put } from "../../api-services/fetch";
 import notification from "../../utility/notification";
 import Greeting from "../layouts/Greeting";
+import { Pagination } from "antd";
 
 const Dashboard = ({ history }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -20,38 +21,56 @@ const Dashboard = ({ history }) => {
 
   const [details, setDetails] = useState([]);
   const [errorMsg, setErrorMsg] = useState("");
+  const [totalElement, setTotalElement] = useState();
+  const [limit, setLimit] = useState(10);
+  const [current, setCurrent] = useState(1);
+
+  const paginationChangeHandler = (current, pageSize) => {
+    setLimit(pageSize);
+    setCurrent(current);
+  };
+
+  useEffect(() => {
+    getList();
+  }, [current, limit]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
     document.title = "EDSG - Training Dashboard";
 
-    const getList = async () => {
-      setIsLoading(true);
-      setErrorMsg("");
-      const res = await get({ endpoint: "/Request/pendingrequest" });
-
-      console.log(res);
-
-      if (res && res.status === 200) {
-        const { data } = res;
-        if (data.code === 1) {
-          setDetails(data.data);
-          if (data.data.length < 1) {
-            setErrorMsg("No Request yet");
-          }
-        } else {
-          setErrorMsg(data.message);
-        }
-      } else {
-        setErrorMsg("Something has gone wrong. Please, try again.");
-      }
-      setIsLoading(false);
-    };
-
-    getList();
-
     getCardValues();
   }, []);
+
+  const getList = async () => {
+    setIsLoading(true);
+    setErrorMsg("");
+    const payload = {
+      pageNumber: current,
+      pageSize: limit,
+    };
+    const res = await put({
+      endpoint: "/Request/pendingrequest",
+      body: payload,
+    });
+
+    let result = JSON?.parse(res.headers["x-pagination"]).TotalCount;
+    setTotalElement(result);
+
+    if (res && res.status === 200) {
+      const { data } = res;
+      if (data.code === 1) {
+        setDetails(data.data);
+        if (data.data.length < 1) {
+          setErrorMsg("No Request yet");
+        }
+      } else {
+        setErrorMsg(data.message);
+      }
+    } else {
+      setErrorMsg("Something has gone wrong. Please, try again.");
+    }
+    setIsLoading(false);
+  };
 
   const getCardValues = async () => {
     const res = await get({ endpoint: "/Dashboard/trainingcounts" });
@@ -159,6 +178,21 @@ const Dashboard = ({ history }) => {
               details.map((item) => <ListItem key={item.id} details={item} />)}
           </tbody>
         </table>
+        {totalElement > limit && (
+          <div style={{ marginTop: "20px" }}>
+            <Pagination
+              showSizeChanger
+              pageSize={limit}
+              onShowSizeChange={paginationChangeHandler}
+              current={current}
+              total={totalElement}
+              // showTotal={true}
+              onChange={paginationChangeHandler}
+              // pageSizeOptions={pageSizeOptions}
+              responsive
+            />
+          </div>
+        )}
         {isLoading && <div className="w-100 center-text p-20">Loading...</div>}
         {errorMsg && <div className="w-100 center-text p-20">{errorMsg}</div>}
       </div>
@@ -179,20 +213,20 @@ const ListItem = ({ details = {} }) => {
         <td className="td p-r" style={{ padding: "20px 10px" }}>
           {details.title}
         </td>
-        <td className="td" style={{ padding: "20px 10px" }}>
+        <td className="td p-r" style={{ padding: "20px 10px" }}>
           {details.organisingBody}
         </td>
-        <td className="td" style={{ padding: "20px 10px" }}>
-          {details.startDate}
+        <td className="td p-r" style={{ padding: "20px 10px" }}>
+          {details.creationDate}
         </td>
-        <td className="td" style={{ padding: "20px 10px" }}>
+        <td className="td p-r" style={{ padding: "20px 10px" }}>
           <div className={`status status-${details.status}`}>
             {`${details.status !== 3 ? "" : "Currently with "}`}
             {details.status !== 3 ? "" : <b>{details.currentlyWith} - </b>}
             <b>{details.approvalStatus}</b>
           </div>
         </td>
-        <td className="td actions" style={{ padding: "20px 10px" }}>
+        <td className="td p-r actions" style={{ padding: "20px 10px" }}>
           {details.lastTreated}
         </td>
       </tr>
