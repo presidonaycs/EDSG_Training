@@ -257,8 +257,8 @@ const TrainingRequestForm = ({ details, closeForm }) => {
     if (!organisingBody)
       return "Please, enter an organising body for the request";
     if (!location) return "Please, enter a location for the training";
-    // if (!totalCost) return 'Please, enter the training cost';
-    // if (!personalExpense) return 'Please, enter personal expense for the request';
+     if (!totalCost) return 'Please, enter the training cost';
+     if (!personalExpense) return 'Please, enter personal expense for the request';
     return null;
   };
 
@@ -633,6 +633,7 @@ const TrainingRequestForm = ({ details, closeForm }) => {
             className="w-100 m-b-10"
             rows={4}
             value={description}
+            type="number"
             onChange={(e) => setDescription(e.target.value)}
             label="Training Details*"
           />
@@ -642,6 +643,7 @@ const TrainingRequestForm = ({ details, closeForm }) => {
               <TextInput
                 className="w-100 m-b-10"
                 value={subscriptionExpense}
+                type="number"
                 onChange={(e) => setSubscriptionExpense(e.target.value)}
                 label="Subscription"
               />
@@ -650,6 +652,7 @@ const TrainingRequestForm = ({ details, closeForm }) => {
               <TextInput
                 className="w-100 m-b-10"
                 value={contingenciesExpense}
+                type="number"
                 onChange={(e) => setContingenciesExpense(e.target.value)}
                 label="Contingencies"
               />
@@ -660,6 +663,7 @@ const TrainingRequestForm = ({ details, closeForm }) => {
               <TextInput
                 className="w-100 m-b-10"
                 value={transportationExpense}
+                type="number"
                 onChange={(e) => setTransportationExpense(e.target.value)}
                 label="Transportation"
               />
@@ -668,6 +672,7 @@ const TrainingRequestForm = ({ details, closeForm }) => {
               <TextInput
                 className="w-100 m-b-10"
                 value={localTransportationExpense}
+                type="number"
                 onChange={(e) => setLocalTransportationExpense(e.target.value)}
                 label="Local Transportation"
               />
@@ -679,6 +684,7 @@ const TrainingRequestForm = ({ details, closeForm }) => {
               <TextInput
                 className="w-100 m-b-10"
                 value={dtaExpense}
+                type="number"
                 onChange={(e) => setDtaExpense(e.target.value)}
                 label="Duty Tour Allowance"
               />
@@ -687,6 +693,7 @@ const TrainingRequestForm = ({ details, closeForm }) => {
               <TextInput
                 className="w-100 m-b-10"
                 value={journalPublicationExpense}
+                type="number"
                 onChange={(e) => setJournalPublicationExpense(e.target.value)}
                 label="Journals/Publication"
               />
@@ -805,7 +812,13 @@ const TrainingRequestForm = ({ details, closeForm }) => {
             <input type="file" hidden id="image-upload" />
           </button>
           <div className="m-t-20">
-            <h4>Uploaded Document</h4>
+          <i>Supported file formats:</i> jpeg , png , gif , pdf, doc , docx, xls, xlsx , ppt.
+          </div>
+          <div>
+            <i>Maximum File Size:</i> 500MB
+          </div>
+          <div className="m-t-20">
+            <h4>Uploaded Documents :</h4>
           </div>
           <div className="w-100 m-t-10 m-b-20">
             {fileArray &&

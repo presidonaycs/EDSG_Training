@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { IoMdClose } from 'react-icons/io';
 import { BsUpload } from 'react-icons/bs';
-
+import {BiImage} from 'react-icons/bi';
 import Loader from '../../assets/svg/loading.svg';
 import TextInput from '../inputs/TextInput';
 import { toggleScroll } from '../../utility/general';
@@ -30,7 +30,7 @@ const CompletionFormModal = ({ closeModal, requestId }) => {
 
   const validateForm = () => {
     if (!documentName) return 'Please, enter a name for the completion certificate';
-    if (!comment) return 'Please, enter a name for the Category';
+    if (!comment) return 'Please, enter a name for the Completion Remark';
     if (!certUrl) return 'Please, upload a certificate of completion';
     return null;
   };
@@ -81,7 +81,7 @@ const CompletionFormModal = ({ closeModal, requestId }) => {
         }
       } else {
         notification({
-          title: 'Network Error',
+          title: 'Certificate Upload Failed',
           message: 'Something went wrong while uploading the certificate of completion. Please, try again later.',
           type: 'danger'
         });
@@ -119,7 +119,7 @@ const CompletionFormModal = ({ closeModal, requestId }) => {
       } else {
         notification({
           title: `Training ${formType === 'create' ? 'Completion' : 'Update'} Error`,
-          message: data.message,
+          message: "Closing action not allowed, because the training is still on-going",
           type: 'danger'
         });
       }
@@ -199,7 +199,8 @@ const CompletionFormModal = ({ closeModal, requestId }) => {
             Upload Certificate
             <input type="file" hidden id="image-upload" />
           </button>
-          <img className="m-b-10 w-100" src={certUrl || ''} alt="upload certificate..." />
+          <div className='m-10'><i>Max File Size:</i> 500KB</div>
+          {certUrl && <img className="m-b-10 w-100" src={certUrl} alt="upload certificate..." />}
           
           <button
             type="button"
